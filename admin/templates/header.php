@@ -1,27 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <HTML>
 <HEAD>
   <title>Администрирование</title>
   <meta http-equiv="Cache-Control" content="no-cache">
   <link rel="stylesheet" href="css/jquery-ui.css">
-  <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="js/fancybox/jquery.fancybox.min.css" />
+  <link rel="stylesheet" href="css/style.css">
   <script src="js/jquery.min.js"></script>
   <script src="js/jquery-ui.js"></script>
   <script src="js/jquery.ui.datepicker-ru.js"></script>
   <script src="js/jquery.maskedinput.min.js"></script>
+  <script src="js/fancybox/jquery.fancybox.min.js"></script>
   <script src="js/main.js"></script>
-  <script src='js/tinymce/tinymce.min.js' referrerpolicy="origin"></script>
+  <script src='js/tinymce/tiny_mce.js'></script>
   <script>
-    tinymce.init({
-      selector: '.tinymce_class',
-      plugins: [
-          "advlist autolink lists link image preview anchor",
-          "code fullscreen save textcolor colorpicker charmap nonbreaking",
-          "insertdatetime media table contextmenu paste imagetools"
-      ],
-      menubar: "edit insert format table",
-      toolbar1: "bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink anchor | image media | forecolor backcolor  | print preview code ",
-      language: 'ru'
+    tinyMCE.init({
+      mode : "specific_textareas",
+      editor_selector : "tinymce_class",
+      theme : "advanced",
+      plugins : "safari,pagebreak,style,layer,table,save,advhr,jbimages,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,noneditable,visualchars,nonbreaking,xhtmlxtras,template,inlinepopups",
+      theme_advanced_buttons1 : "formatselect,fontselect,fontsizeselect,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,",
+      theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,bullist,numlist,|,link,unlink,anchor,image,jbimages,cleanup,code,|,insertdate,inserttime,|,forecolor,backcolor",
+      theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+      theme_advanced_toolbar_location : "top",
+      theme_advanced_toolbar_align : "left",
+      theme_advanced_statusbar_location : "bottom",
+      convert_urls : false
     });
   </script>
 </HEAD>

@@ -27,7 +27,7 @@ function translit($text){
   return $text;
 }
 
-if (!empty($_REQUEST['text'])){
-  echo translit($_REQUEST['text']);
+if (!empty($_REQUEST['t'])){
+  echo translit($_REQUEST['t']);
 }
 ?>

@@ -2,32 +2,24 @@
   date_default_timezone_set('Europe/Moscow');
   header("Cache-Control: no-store, no-cache, must-revalidate");
   header("Expires: " . date("r"));
-  require('../config.php');  
-  require('lib/mysql.class.php');
-  $DB = new ConnectMySQL;
+  require('config.php');  
+  require('inc/mysql.class.php');
+  if (empty($_REQUEST['page'])) die("Некорректный запрос");
 ?>
 <meta http-equiv="Cache-Control" content="no-cache">
-<link href='css/style.css' rel='stylesheet'>
 <title>Загрузка картинок</title>
-<script type="text/javascript" src="js/jquery.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui.js"></script>
-<script type="text/javascript" src="../plugins/fancybox/lib/jquery.mousewheel-3.0.6.pack.js"></script>
-<script type="text/javascript" src="../plugins/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-<script type="text/javascript">
-  $(document).ready(function() {
-    $(".image").fancybox();
-    $(".popup").fancybox();
-  });
-</script>
-<script type="text/javascript" src="js/main.js"></script>
+<link rel="stylesheet" href="js/fancybox/jquery.fancybox.min.css" />
+<link rel="stylesheet" href="css/style.css">
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.maskedinput.min.js"></script>
+<script src="js/fancybox/jquery.fancybox.min.js"></script>
+<script src="js/main.js"></script>
 <BODY leftMargin="30" topMargin="10">
 <?php
   $id = $_REQUEST['id'];
   $page = $_REQUEST['page'];
-  $document_root = $_SERVER['DOCUMENT_ROOT'];
-  require('config/db_connect.php');
-  require('config/settings.php');
-  $row = mysqli_fetch_array(mysqli_query($db, "select * from $page where id='$id'"));
+  $row = $DB->getData("select * from ".$page." where id='".$id."' limit 1")[0];
   echo "
   <h1>".$row['title']."</h1>";
   $main_image = $row['m_image'];
@@ -38,7 +30,7 @@
     foreach ($list as $l){
       $l_arr = explode('=',$l);
       //echo $l_arr[1]." - $s<br>";
-      mysqli_query($db, "update ".DB_PREFIX."images set sort='$s' where id='".$l_arr[1]."'");
+      $DB->query("update images set sort='".$s."' where id='".$l_arr[1]."'");
       $s++;
     }
     echo "
@@ -116,36 +108,36 @@
     $delete = $_GET['delete'];
     unlink("../images/$page/$id/small/$delete");
     unlink("../images/$page/$id/large/$delete");
-    mysqli_query($db, "delete from ".DB_PREFIX."images where file='$delete'&&page='$page'&&publ_id='$id'");
+    $DB->query("delete from images where file='".$delete." && page='".$page."' && publ_id='".$id."'");
     echo "
     <div class='alt_message'>Картинка $delete удалена.</div>";
   }
   else if (isset($_GET['main'])){
     $main = $_GET['main'];
-    mysqli_query($db, "update $page set m_image='$main' where id='$id'");
+    $DB->query("update $page set images='".$main."' where id='$id'");
     echo "
     <div class='alt_message'>Картинка $main установлена главной в записи.</div>
     <script>
-      window.top.$('#m_image_$id').attr('src','/images/$page/$id/small/$main');
-      window.top.$('#m_image').val('$main');
+      window.top.$('#images_$id').attr('src','../images/".$page."/".$id."/small/".$main."');
+      window.top.$('#images').val('$main');
     </script>";
   }
   echo "<hr>";
   // Создаём директории, если их ещё нет
-  if (!file_exists("../images/$page/$id")){
-    mkdir("../images/$page/$id",0777);
+  if (!file_exists("../images/".$page."/".$id)){
+    mkdir("../images/".$page."/".$id,0777);
   }
-  if (!file_exists("../images/$page/$id/small")){
-    mkdir("../images/$page/$id/small",0777);
+  if (!file_exists("../images/".$page."/".$id."/small")){
+    mkdir("../images/".$page."/".$id."/small",0777);
   }
-  if (!file_exists("../images/$page/$id/large")){
-    mkdir("../images/$page/$id/large",0777);
+  if (!file_exists("../images/".$page."/".$id."/large")){
+    mkdir("../images/".$page."/".$id."/large",0777);
   }
   $handle = opendir("../images/$page/$id/small");
   while (false !==($fil = readdir($handle))){ 
     if (stristr($fil,'.jpg') || stristr($fil,'.jpeg')){
-      if (!$DB->getData("select * from images where page='$page'&&publ_id='$id'&&file='$fil'")[0]['count']){
-        $DB->query("insert images set page='$page', publ_id='$id' , file='$fil'");
+      if (!count($DB->getData("select * from images where page='".$page."' && publ_id='".$id."' && file='".$fil."'"))){
+        $DB->query("insert images set page='".$page."', publ_id='".$id."' , file='".$fil."'");
       }
     }
   }
@@ -157,16 +149,16 @@
   <div id='sortable' class='upload_images'>";
   // Считываем изображения из БД
   $img_cnt = 0; // Счётчик изображений
-  $images_sql = $DB->getData("select * from images where page='$page'&&publ_id='$id' order by sort");
+  $images_sql = $DB->getData("select * from images where page='".$page."' && publ_id='".$id."' order by sort");
   foreach ($images_sql as $is){
-    // Удаляем и БД картинки, которых нет в директории
-    if (!file_exists("../images/$page/$id/large/".$is['file'])){
-      mysqli_query($db, "delete from ".DB_PREFIX."images where id='".$is['id']."'");
+    // Удаляем из БД картинки, которых нет в директории
+    if (!file_exists("../images/".$page."/".$id."/large/".$is['file'])){
+      $DB->query("delete from images where id='".$is['id']."'");
     }
     $file = $is['file'];
     echo "
     <div id='image_".$is['id']."'>
-      <img src='../images/$page/$id/small/".$is['file']."' style='max-height:100px; max-width:100px; margin:0 0 10px 0;'><br>
+      <img src='../images/".$page."/".$id."/small/".$is['file']."' style='max-height:100px; max-width:100px; margin:0 0 10px 0;'><br>
       <label>
         <textarea id='image_".$is['id']."_area' rows='2' placeholder='Текст для подсказки' onBlur=\"save_imagename('".$is['file']."','$page','".$is['id']."','image_".$is['id']."_area')\" style='margin:6px 0; background:#ffffff; resize:none;'>".$is['title']."</textarea>
       </label>
@@ -176,13 +168,13 @@
       </div>
     </div>
     <script>
-      imgs += \"<img src='../images/$page/$id/small/".$is['file']."' class='m_image_th' onClick=main_image('../images/$page/$id/small/".$is['file']."','".$is['file']."','$id')>\";
+      imgs += \"<img src='../images/$page/$id/small/".$is['file']."' class='images_th' onClick=main_image('../images/$page/$id/small/".$is['file']."','".$is['file']."','$id')>\";
     </script>";
     $img_cnt++;
   }
   // Если одно изображение - делем его главным
   if ($img_cnt==1){
-    mysqli_query($db, "update $page set m_image='$file' where id='$id'");
+    $DB->query("update $page set m_image='".$file."' where id='".$id."'");
     echo "
     <script>
       window.top.$('#m_image_$id').attr('src','/images/$page/$id/small/$file');

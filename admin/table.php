@@ -1,5 +1,5 @@
 <?php
-  require("inc/head.php");
+  require("inc/head.inc.php");
   require('scripts/functions.php');
   $page = !empty($_REQUEST['page']) ? $_REQUEST['page'] : '';
   $sort = !empty($_REQUEST['sort']) ? $_REQUEST['sort'] : 'id';
@@ -44,7 +44,7 @@
         $sql .= "$k='".addslashes($v)."', ";
       }
     }
-    if (isset($_FILES['image'])){ 
+    if (!empty($_FILES['image'])){ 
       if (!file_exists("../images/$page")){
         mkdir("../images/$page",0777);
       }
@@ -57,15 +57,15 @@
       $filesize = $_FILES['image']['size'];
       $filetype = $_FILES["image"]["type"];
       if ($filetype=='image/jpeg' || $filetype=='image/gif' || $filetype=='image/png'){
-        if (file_exists("../images/$page/$filename")){
-          echo "<div class='alt_message'>Файл с именем \"$filename\" уже загружен.</div>";
-          $sql .= "image='$filename', ";
+        if (file_exists("../images/".$page."/".$filename)){
+          echo "<div class='alt_message'>Файл с именем \"".$filename."\" уже загружен.</div>";
+          $sql .= "image='".$filename."', ";
         }
         else{
           if ($filesize<1000000){
             if (copy($file,"../images/$page/$id/$filename")){
               echo "<div class='alt_message'>Картинка загружена.</div>";
-              $sql .= "image='$filename', ";
+              $sql .= "image='".$filename."', ";
             }
             else echo "<div class='alt_message'>Ошибка при загрузке файла.</div>";
           }
@@ -73,17 +73,19 @@
         }
       }
     }
-    $sql .= "id='$id' where id='$id'";
+    $sql .= "id='".$id."' where id='".$id."'";
     //echo "$sql";
     $result = $DB->query($sql);
     if ($result){
       echo "<div class='alt_message'>Запись сохранена.</div>";
     }
     else echo "<div class='alt_message'>Ошибка записи!</div>";
+    
+    // Удаление картинки
     if (isset($_POST['del_image'])){
-      $result2 = $DB->query("update $page set image='' where id='$id'");
+      $result2 = $DB->query("update ".$page." set image='' where id='$id'");
       if ($result2){
-        if (unlink("../images/$page/$id/".$_POST['del_image'])){
+        if (@unlink("../images/".$page."/".$id."/".$_POST['del_image'])){
           echo "<div class='alt_message'>Картинка удалена.</div>";
         }
         else{
@@ -92,10 +94,17 @@
       }
       else echo "<div class='alt_message'>Ошибка записи!</div>";
     }
+    
+    // Если нажата "Сохранить" - уходим со страницы редактирования
+    // Если "Применить" - остаёмся на странице
     if (isset($_REQUEST['save'])){
-      // Если нажата "Сохранить" - уходим со страницы редактирования
-      // Если "Применить" - остаёмся на странице
       unset($_REQUEST['id']);
+      //$link = "table.php?page=".$_REQUEST['page']."";
+      //echo "<script>location.href='".$link."'</script>";
+    }
+    else{
+      //$link = "table.php?page=".$_REQUEST['page']."&id=".$_REQUEST['id']."$group=".$_REQUEST['group']."";
+      //echo "<script>location.href='".$link."'</script>";
     }
   }
   
@@ -124,14 +133,14 @@
     $header = strip_tags($data['title']);
     include("templates/item.php");
     echo "
+    <form action='table.php' method='post' enctype='multipart/form-data'>
     <table border='0' cellspacing='0' cellpadding='11' width='100%'>
     <tr><td colspan='2'>
-    <form action='table.php' method='post' enctype='multipart/form-data'>
-      <input type='hidden' name='id' value='$id'>
-      <input type='hidden' name='page' value='$page'>
-      <input type='hidden' name='sort' value='$sort'>
-      <input type='hidden' name='fth' value='$fth'>
-      <input type='hidden' name='field_group' id='field_group' Аvalue='$field_group'>
+      <input type='hidden' name='id' value='".$id."'>
+      <input type='hidden' name='page' value='".$page."'>
+      <input type='hidden' name='sort' value='".$sort."'>
+      <input type='hidden' name='fth' value='".$fth."'>
+      <input type='hidden' name='field_group' id='field_group' value='".$field_group."'>
     </td></tr>";
     $columns = $DB->getData("show columns from $page"); 
     foreach ($columns as $column){
@@ -258,33 +267,34 @@
         </label>";
         }
       }
-      else if ($column['Field']=='m_image'){
-        $m_image_path = !empty($data['m_image']) ? "../images/$page/$id/small/".$data['m_image'] : 'images/m_image.png';
+      else if ($column['Field']=='images'){
+        $m_image_path = !empty($data['images']) ? "../images/".$page."/".$id."/small/".$data['images'] : 'images/m_image.png';
         echo "
-        <input type='hidden' name='m_image' id='m_image' value='".$data['m_image']."'>
-        <img src='$m_image_path' height='130' id='m_image_$id'><br>
+        <input type='hidden' name='images' id='m_image' value='".$data['images']."'>
+        <img src='$m_image_path' height='130' id='m_image_".$id."'><br>
         <!--<div style='width:130px; height:130; text-align:center; border:solid 1px #aaa;'><br>Нажмите на картинку, чтобы сделать её главной в записи.</div>-->
         <div id='img_list'>";
         if (!file_exists("../images/$page")){
           mkdir("../images/$page",0777);
         }
-        if (!file_exists("../images/$page/$id")){
-          mkdir("../images/$page/$id",0777);
+        if (!file_exists("../images/".$page."/".$id)){
+          mkdir("../images/".$page."/".$id, 0777);
         }
-        if (!file_exists("../images/$page/$id/small")){
-          mkdir("../images/$page/$id/small",0777);
+        if (!file_exists("../images/".$page."/".$id."/small")){
+          mkdir("../images/".$page."/".$id."/small", 0777);
         }
-        if (!file_exists("../images/$page/$id/large")){
-          mkdir("../images/$page/$id/large",0777);
+        if (!file_exists("../images/".$page."/".$id."/large")){
+          mkdir("../images/".$page."/".$id."/large", 0777);
         }
-        $handle = opendir($document_root."/images/$page/$id/small");
-        $images = $DB->getData("select * from images where page='$page'&&publ_id='$id' order by sort");
+        $handle = opendir("../images/$page/$id/small");
+        $images = $DB->getData("select * from images where page='".$page."'&&publ_id='".$id."' order by sort");
         foreach ($images as $i){
           echo "
-          <img src='../images/$page/$id/small/".$i['file']."' class='m_image_th' onClick=\"main_image('../images/$page/$id/small/".$i['file']."','".$i['file']."','$id')\">";
+          <img src='../images/$page/$id/small/".$i['file']."' class='images_th' onClick=\"main_image('../images/$page/$id/small/".$i['file']."','".$i['file']."','$id')\">";
         }
         echo "</div><br>
-        <span onClick=\"$.fancybox.open({type:'iframe', href:'upload_image.php?page=$page&id=$id'})\" style='margin:10px 0; cursor:pointer;' class='form_button'>Добавить картинки</span>";
+        <span onClick=\"$.fancybox.open({type:'iframe', src:'upload_image.php?page=$page&id=$id'})\" style='margin:10px 0; cursor:pointer;' class='form_button'>Добавить картинки</span>
+";
       }
       else if (strstr($column['Field'],'date')){
         echo "
@@ -351,8 +361,9 @@
       <input type='submit' name='apply' value='Применить' class='form_button'>
       &nbsp;&nbsp;
       <input type='submit' name='save' value='Сохранить' class='form_button2'>
-    </td></tr></form>
+    </td></tr>
     </table>
+    </form>
     <script>
       $('input[type=\"text\"], textarea').on('blur keyup', function(){
         form_data = $('form').serialize();
@@ -403,5 +414,5 @@
       include("templates/section.php");
     }
   }
-  include("inc/foot.php");
+  include("inc/foot.inc.php");
 ?>

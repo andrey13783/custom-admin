@@ -11,12 +11,12 @@
     $dbhost = 'localhost';
     $dbuser = 'root';
     $dbpass = '';
-    $dbname = 'base';
+    $dbname = 'ehoho';
   }
   else{
     $dbhost = 'localhost';
-    $dbuser = '';
-    $dbpass = '';
-    $dbname = '';
+    $dbuser = 'u26452_mysql';
+    $dbpass = 'hR#23_Nk9#jZ1&5j-^Yu45@';
+    $dbname = 'u26452_ehoho';
   }
 ?>

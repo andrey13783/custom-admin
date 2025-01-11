@@ -72,7 +72,12 @@
     }
     // Улаление строки (записи)
     if ($_REQUEST['action']=='delete'){
-      $DB->query("delete from $page where id='".$_REQUEST['id']."'");
+      $del_ids = explode(',', $_REQUEST['id']);
+      foreach ($del_ids as $del_id){
+        if (!empty($del_id)){
+          $DB->query("delete from $page where id='".$del_id."'");
+        }
+      }
     }
     
     $sql_part = "";
@@ -110,6 +115,9 @@
       <div class='row row_header'>
         <div class='table_header'>&nbsp;</div>
         <div class='table_header'>
+          <input type='checkbox' class='check_all'>
+        </div>
+        <div class='table_header'>
           <a onClick=\"list_rows('$page','$level','".$id."','$sc_ch','$pnum','$filter','$search','','')\" style='cursor:pointer;'>ID &nbsp;";
           if ($sort=="$id") echo "$sc_sim";
         echo "</a>
@@ -143,6 +151,9 @@
         }
         echo "
         </div>
+        <div class='table_content'>
+          <input type='checkbox' class='row_check' data-id='".$row['id']."'>
+        </div>
         <div class='table_content'>".$row['id']."</div>";
       foreach ($columns_names as $c){
         if (!in_array($c, $visible_areas)) continue; // Пропстить поля, которые не разрешены к показу
@@ -168,8 +179,8 @@
             <img src='$image' style='max-width:80px; max-height:80px;'>";
           }
         }
-        else if ($c=='m_image'){
-          $image = $row['m_image'] ? "/images/$page/".$row['id']."/small/".$row['m_image'] : 'images/noimage.png';
+        else if ($c=='images'){
+          $image = $row['images'] ? "/images/$page/".$row['id']."/small/".$row['images'] : 'images/noimage.png';
           echo "
           <img id='m_image_".$row['id']."' src='$image' style='max-width:80px; max-height:80px; cursor:pointer;' onClick=\"$.fancybox.open({type:'iframe', href:'upload_image.php?page=$page&id=".$row['id']."'})\">";
         }
@@ -280,6 +291,8 @@
     </div>";
     echo "<br>
     <button onClick=\"list_rows('$page','$level','id','asc','$pnum','','','add','0')\" class='form_button'>Добавить запись</button>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <button onClick=\"if(confirm('Вы действительно хотите удалить выбранные записи?')){ delete_rows('$page','$level','$sort','$sc','$pnum','','','delete','')}\" class='form_button2'>Удалить выделнное</button>
     <div class='paginator'>";
     $pages = ceil($num_result2/$amth)+1;
     for ($p=1; $p<$pages; $p++){

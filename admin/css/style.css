@@ -19,6 +19,9 @@ input, textarea, select {
 input: focus, textarea: focus, select: focus {
 	border: solid 1px #286090;
 }
+input[type="checkbox"]{
+	transform: scale(1.3, 1.3);
+}
 /*
 input: focus, select: focus, textarea: focus {
 	border: solid 1px #666;
@@ -146,6 +149,7 @@ main > div {
 	margin: 18px 0;
 	padding: 7px 24px;
 	background: #eee;
+	border: none;
 	border-radius: 12px;
 	color: #000;
 	font-weight: bold;
@@ -156,7 +160,7 @@ main > div {
 .clear {
 	clear: both;
 }
-.m_image {
+.images {
 	height: 130px;
 	width: auto;
 	margin-bottom: 10px;
@@ -376,12 +380,12 @@ main > div {
 	//border: solid 1px red;
 	padding: 0;
 }
-.m_image_th {
-	margin: 1px 15px 1px 0;
+.images_th {
+	margin: 15px 15px 1px 1px;
 	cursor: pointer;
 	height: 60px;
 }
-.m_image_th:hover {
+.images_th:hover {
 	opacity: 0.8;
 }
 .upload_images > div {
