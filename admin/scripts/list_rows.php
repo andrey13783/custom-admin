@@ -158,14 +158,7 @@
       foreach ($columns_names as $c){
         if (!in_array($c, $visible_areas)) continue; // Пропстить поля, которые не разрешены к показу
         // Формируем превью записи
-        $preview = strip_tags($row[$c]);
-        $slimit = 150;
-        if (strlen($preview)>$slimit){
-          $preview = substr($preview,0,$slimit);
-          $prev_ar = explode(' ',$preview);
-          unset($prev_ar[count($prev_ar)-1]);
-          $preview = implode(' ',$prev_ar).'...';
-        }
+        $preview = $row[$c];
         echo "
         <div class='table_content'>";
         if ($c=='image'){

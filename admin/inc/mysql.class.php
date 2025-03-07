@@ -6,7 +6,7 @@
     
     function сonnect(){
       include(__DIR__."/../config.php");
-      $this->db_link = @mysqli_connect($dbhost, $dbuser, $dbpass, $dbname) or die("Ошибка подключения к базе");
+      $this->db_link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname) or die("Ошибка подключения к базе");
       $this->query($this->db_link, "set names `utf8`");
       mysqli_set_charset($this->db_link, 'utf8');
     }

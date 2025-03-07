@@ -2,6 +2,7 @@
   require("inc/head.inc.php");
   require('scripts/functions.php');
   $page = !empty($_REQUEST['page']) ? $_REQUEST['page'] : '';
+  $search = !empty($_REQUEST['search']) ? $_REQUEST['search'] : '';
   $sort = !empty($_REQUEST['sort']) ? $_REQUEST['sort'] : 'id';
   $section = $DB->getData("select title, level, adm_access from adm_menu where page='$page'")[0];
   if (!$section){
@@ -158,7 +159,8 @@
       }
       echo "
       </td><td>";
-      if (is_array($inc = $DB->getData("select title, url from ".$column['Field']." where sh='1'&&url!=''&&level='0'"))){
+      if (count($DB->getData("show tables like '".$column['Field']."'"))){
+        $inc = $DB->getData("select title, url from ".$column['Field']." where sh='1'&&url!=''&&level='0'");
         if ($fields_many[$column['Field']]){
           echo "
           <input type='hidden' value='".$data[$column['Field']]."' name='".$column['Field']."' id='".$column['Field']."'>";
@@ -166,7 +168,7 @@
             echo "
             <div style='margin:5px 15px 5px 0;'>
               <label onClick=''>
-                <input type='checkbox' value='".$i['url']."' class='".$column['Field']."' onClick='check_".$column['Field']."()'"; if (strstr($data[$column['Field']],''.$i['title'].'')){ echo " checked";} echo ">
+                <input type='checkbox' value='".$i['url']."' class='".$column['Field']."' onClick='check_".$column['Field']."()'"; if (strstr($data[$column['Field']],$i['url'])){ echo " checked";} echo ">
                 ".$i['title']."
               </label>
             </div>
@@ -328,6 +330,10 @@
       else if ($column['Field']=='text'){
         echo "
         <textarea name='text' id='text' style='width:100%; height:400px;' class='tinymce_class'>".$data['text']."</textarea>";
+      }
+      else if ($column['Field']=='preview'){
+        echo "
+        <textarea name='preview' style='width:100%; height:300px;' class='tinymce_class'>".$data['preview']."</textarea>";
       }
       else{
         if ($column['Type']=='int(11)'){

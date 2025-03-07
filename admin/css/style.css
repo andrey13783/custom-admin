@@ -264,6 +264,9 @@ main > div {
 	padding: 14px;
 	color: #000;
 }
+.table_content p {
+	margin: 0;
+}
 .table_content i.fa {
 	font-size: 30px;
 	cursor: pointer;
